@@ -1,0 +1,751 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "6b642bb5-b4c3-4063-948c-8c20b437b572",
+   "metadata": {},
+   "source": [
+    "# GenAI Assignment: Prompt Engineering using LangChain\n",
+    "\n",
+    "This notebook demonstrates building reusable and dynamic prompt systems \n",
+    "using LangChain PromptTemplate and ChatPromptTemplate."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9ecce7a5-c4df-495e-b705-1f8044e033fe",
+   "metadata": {},
+   "source": [
+    "## Task 1: Replace Hardcoded Prompts\n",
+    "\n",
+    "This task demonstrates how to replace hardcoded prompts using LangChain PromptTemplate \n",
+    "to create reusable and dynamic prompt systems."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5082870f-3396-4710-a789-927ea6ff9bcd",
+   "metadata": {},
+   "source": [
+    "## Expected Pipeline Flow\n",
+    "\n",
+    "This assignment follows a structured pipeline:\n",
+    "\n",
+    "- User Input  \n",
+    "- Input Validation  \n",
+    "- Prompt Template Creation  \n",
+    "- Dynamic Prompt Generation  \n",
+    "- Output Display  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "23f351d1-984c-4215-a4ed-24d939abb144",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: langchain in .\\OneDrive\\Desktop\\Lib\\site-packages (1.2.15)\n",
+      "Requirement already satisfied: langchain-core<2.0.0,>=1.2.10 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain) (1.2.28)\n",
+      "Requirement already satisfied: langgraph<1.2.0,>=1.1.5 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain) (1.1.6)\n",
+      "Requirement already satisfied: pydantic<3.0.0,>=2.7.4 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain) (2.12.5)\n",
+      "Requirement already satisfied: jsonpatch<2.0.0,>=1.33.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain-core<2.0.0,>=1.2.10->langchain) (1.33)\n",
+      "Requirement already satisfied: langsmith<1.0.0,>=0.3.45 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain-core<2.0.0,>=1.2.10->langchain) (0.7.29)\n",
+      "Requirement already satisfied: packaging>=23.2.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain-core<2.0.0,>=1.2.10->langchain) (25.0)\n",
+      "Requirement already satisfied: pyyaml<7.0.0,>=5.3.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain-core<2.0.0,>=1.2.10->langchain) (6.0.3)\n",
+      "Requirement already satisfied: tenacity!=8.4.0,<10.0.0,>=8.1.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain-core<2.0.0,>=1.2.10->langchain) (9.1.4)\n",
+      "Requirement already satisfied: typing-extensions<5.0.0,>=4.7.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain-core<2.0.0,>=1.2.10->langchain) (4.15.0)\n",
+      "Requirement already satisfied: uuid-utils<1.0,>=0.12.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langchain-core<2.0.0,>=1.2.10->langchain) (0.14.1)\n",
+      "Requirement already satisfied: jsonpointer>=1.9 in .\\OneDrive\\Desktop\\Lib\\site-packages (from jsonpatch<2.0.0,>=1.33.0->langchain-core<2.0.0,>=1.2.10->langchain) (3.0.0)\n",
+      "Requirement already satisfied: langgraph-checkpoint<5.0.0,>=2.1.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langgraph<1.2.0,>=1.1.5->langchain) (4.0.1)\n",
+      "Requirement already satisfied: langgraph-prebuilt<1.1.0,>=1.0.9 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langgraph<1.2.0,>=1.1.5->langchain) (1.0.9)\n",
+      "Requirement already satisfied: langgraph-sdk<0.4.0,>=0.3.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langgraph<1.2.0,>=1.1.5->langchain) (0.3.13)\n",
+      "Requirement already satisfied: xxhash>=3.5.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langgraph<1.2.0,>=1.1.5->langchain) (3.6.0)\n",
+      "Requirement already satisfied: ormsgpack>=1.12.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langgraph-checkpoint<5.0.0,>=2.1.0->langgraph<1.2.0,>=1.1.5->langchain) (1.12.2)\n",
+      "Requirement already satisfied: httpx>=0.25.2 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.2.0,>=1.1.5->langchain) (0.28.1)\n",
+      "Requirement already satisfied: orjson>=3.11.5 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.2.0,>=1.1.5->langchain) (3.11.8)\n",
+      "Requirement already satisfied: requests-toolbelt>=1.0.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.2.10->langchain) (1.0.0)\n",
+      "Requirement already satisfied: requests>=2.0.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.2.10->langchain) (2.32.5)\n",
+      "Requirement already satisfied: zstandard>=0.23.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.2.10->langchain) (0.25.0)\n",
+      "Requirement already satisfied: anyio in .\\OneDrive\\Desktop\\Lib\\site-packages (from httpx>=0.25.2->langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.2.0,>=1.1.5->langchain) (4.12.1)\n",
+      "Requirement already satisfied: certifi in .\\OneDrive\\Desktop\\Lib\\site-packages (from httpx>=0.25.2->langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.2.0,>=1.1.5->langchain) (2025.10.5)\n",
+      "Requirement already satisfied: httpcore==1.* in .\\OneDrive\\Desktop\\Lib\\site-packages (from httpx>=0.25.2->langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.2.0,>=1.1.5->langchain) (1.0.9)\n",
+      "Requirement already satisfied: idna in .\\OneDrive\\Desktop\\Lib\\site-packages (from httpx>=0.25.2->langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.2.0,>=1.1.5->langchain) (3.11)\n",
+      "Requirement already satisfied: h11>=0.16 in .\\OneDrive\\Desktop\\Lib\\site-packages (from httpcore==1.*->httpx>=0.25.2->langgraph-sdk<0.4.0,>=0.3.0->langgraph<1.2.0,>=1.1.5->langchain) (0.16.0)\n",
+      "Requirement already satisfied: annotated-types>=0.6.0 in .\\OneDrive\\Desktop\\Lib\\site-packages (from pydantic<3.0.0,>=2.7.4->langchain) (0.7.0)\n",
+      "Requirement already satisfied: pydantic-core==2.41.5 in .\\OneDrive\\Desktop\\Lib\\site-packages (from pydantic<3.0.0,>=2.7.4->langchain) (2.41.5)\n",
+      "Requirement already satisfied: typing-inspection>=0.4.2 in .\\OneDrive\\Desktop\\Lib\\site-packages (from pydantic<3.0.0,>=2.7.4->langchain) (0.4.2)\n",
+      "Requirement already satisfied: charset_normalizer<4,>=2 in .\\OneDrive\\Desktop\\Lib\\site-packages (from requests>=2.0.0->langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.2.10->langchain) (3.4.4)\n",
+      "Requirement already satisfied: urllib3<3,>=1.21.1 in .\\OneDrive\\Desktop\\Lib\\site-packages (from requests>=2.0.0->langsmith<1.0.0,>=0.3.45->langchain-core<2.0.0,>=1.2.10->langchain) (2.5.0)\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "[notice] A new release of pip is available: 26.0 -> 26.0.1\n",
+      "[notice] To update, run: python.exe -m pip install --upgrade pip\n"
+     ]
+    }
+   ],
+   "source": [
+    "!pip install langchain"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "bd033d58-6e07-44c6-8704-4c3c9f64e09e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from langchain_core.prompts import PromptTemplate"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "639d7414-c5d0-4fe2-876b-b8ea7b01e7ce",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdin",
+     "output_type": "stream",
+     "text": [
+      "Enter a topic:  Artificial Intelligence\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Generated Prompt:\n",
+      "Explain Artificial Intelligence in simple terms for beginners\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Importing required library (UPDATED IMPORT)\n",
+    "from langchain_core.prompts import PromptTemplate\n",
+    "\n",
+    "# Step 1: Define the template\n",
+    "template = \"Explain {topic} in simple terms for beginners\"\n",
+    "\n",
+    "# Step 2: Create PromptTemplate object\n",
+    "prompt_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\"],\n",
+    "    template=template\n",
+    ")\n",
+    "\n",
+    "# Step 3: Function to generate prompt\n",
+    "def generate_explanation(topic):\n",
+    "    return prompt_template.format(topic=topic)\n",
+    "\n",
+    "# Step 4: Example usage\n",
+    "topic = input(\"Enter a topic: \")\n",
+    "result = generate_explanation(topic)\n",
+    "\n",
+    "# Step 5: Output\n",
+    "print(\"\\nGenerated Prompt:\")\n",
+    "print(result)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0db527f7-8ee6-418e-ad0a-4004f125f8b6",
+   "metadata": {},
+   "source": [
+    "## Task 2: Multi-Input Prompt System\n",
+    "\n",
+    "This task demonstrates how to use multiple input variables in a PromptTemplate \n",
+    "to generate dynamic and structured prompts."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "01fcdbd1-60aa-4811-8b24-f105fba3547a",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdin",
+     "output_type": "stream",
+     "text": [
+      "Enter topic:  C Programming\n",
+      "Enter audience:  Students\n",
+      "Enter tone:  Professional\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Generated Prompt:\n",
+      "Explain C Programming for students in a professional tone\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Importing required library\n",
+    "from langchain_core.prompts import PromptTemplate\n",
+    "\n",
+    "# Step 1: Define the template\n",
+    "template = \"Explain {topic} for {audience} in a {tone} tone\"\n",
+    "\n",
+    "# Step 2: Create PromptTemplate object\n",
+    "prompt_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\", \"audience\", \"tone\"],\n",
+    "    template=template\n",
+    ")\n",
+    "\n",
+    "# Step 3: Function (reusable)\n",
+    "def generate_prompt(topic, audience, tone):\n",
+    "    return prompt_template.format(\n",
+    "        topic=topic,\n",
+    "        audience=audience,\n",
+    "        tone=tone\n",
+    "    )\n",
+    "\n",
+    "# Step 4: User input\n",
+    "topic = input(\"Enter topic: \").title()\n",
+    "audience = input(\"Enter audience: \").lower()\n",
+    "tone = input(\"Enter tone: \").lower()\n",
+    "\n",
+    "# Step 5: Generate output\n",
+    "result = generate_prompt(topic, audience, tone)\n",
+    "\n",
+    "print(\"\\nGenerated Prompt:\")\n",
+    "print(result)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "bdd0652b-390d-4baa-9b7a-9deac5115bf4",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Explain AI for beginners in a friendly tone\n",
+      "Explain Python for kids in a fun tone\n",
+      "Explain Deep Learning for engineers in a technical tone\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Test Cases\n",
+    "print(generate_prompt(\"AI\", \"beginners\", \"friendly\"))\n",
+    "print(generate_prompt(\"Python\", \"kids\", \"fun\"))\n",
+    "print(generate_prompt(\"Deep Learning\", \"engineers\", \"technical\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "43380e47-29b6-44bb-8149-0a9b3b66bc07",
+   "metadata": {},
+   "source": [
+    "## Task 3: Prompt Variations Engine\n",
+    "\n",
+    "This task demonstrates how multiple PromptTemplates can be used \n",
+    "to generate different styles of prompts for the same topic."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "cb850646-e9d7-4ff0-8873-dc776638643d",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Teaching Style:\n",
+      " Explain Machine Learning clearly step by step\n",
+      "\n",
+      "Interview Style:\n",
+      " Ask 3 questions about Machine Learning\n",
+      "\n",
+      "Storytelling Style:\n",
+      " Explain Machine Learning as a story\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Importing required library\n",
+    "from langchain_core.prompts import PromptTemplate\n",
+    "\n",
+    "# Step 1: Define templates\n",
+    "\n",
+    "# Teaching Template\n",
+    "teaching_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\"],\n",
+    "    template=\"Explain {topic} clearly step by step\"\n",
+    ")\n",
+    "\n",
+    "# Interview Template\n",
+    "interview_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\"],\n",
+    "    template=\"Ask 3 questions about {topic}\"\n",
+    ")\n",
+    "\n",
+    "# Storytelling Template\n",
+    "story_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\"],\n",
+    "    template=\"Explain {topic} as a story\"\n",
+    ")\n",
+    "\n",
+    "# Step 2: Topic\n",
+    "topic = \"Machine Learning\"\n",
+    "\n",
+    "# Step 3: Generate outputs\n",
+    "teaching_output = teaching_template.format(topic=topic)\n",
+    "interview_output = interview_template.format(topic=topic)\n",
+    "story_output = story_template.format(topic=topic)\n",
+    "\n",
+    "# Step 4: Print outputs\n",
+    "print(\"Teaching Style:\\n\", teaching_output)\n",
+    "print(\"\\nInterview Style:\\n\", interview_output)\n",
+    "print(\"\\nStorytelling Style:\\n\", story_output)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "998c8bce-c466-4717-a0f0-7074b53adf96",
+   "metadata": {},
+   "source": [
+    "## Task 4: ChatPromptTemplate System\n",
+    "\n",
+    "This task demonstrates how to use ChatPromptTemplate to create role-based \n",
+    "chat prompts with system and user messages."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "05d92243-c19a-4e1e-9cbc-b972779c3036",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "SYSTEM: You are a teacher. Explain the topic clearly.\n",
+      "HUMAN: Tell me about Neural Networks\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Import required classes\n",
+    "from langchain_core.prompts import ChatPromptTemplate\n",
+    "\n",
+    "# Step 1: Function to create chat prompt based on role\n",
+    "def create_chat_prompt(role, topic):\n",
+    "    \n",
+    "    # Define system behavior based on role\n",
+    "    if role == \"teacher\":\n",
+    "        system_message = \"You are a teacher. Explain the topic clearly.\"\n",
+    "        \n",
+    "    elif role == \"interviewer\":\n",
+    "        system_message = \"You are an interviewer. Ask questions about the topic.\"\n",
+    "        \n",
+    "    elif role == \"motivator\":\n",
+    "        system_message = \"You are a motivator. Encourage and inspire about the topic.\"\n",
+    "        \n",
+    "    else:\n",
+    "        system_message = \"You are a helpful assistant.\"\n",
+    "    \n",
+    "    # Step 2: Create ChatPromptTemplate\n",
+    "    chat_template = ChatPromptTemplate.from_messages([\n",
+    "        (\"system\", system_message),\n",
+    "        (\"user\", \"Tell me about {topic}\")\n",
+    "    ])\n",
+    "    \n",
+    "    # Step 3: Format prompt\n",
+    "    return chat_template.format_messages(topic=topic)\n",
+    "\n",
+    "# Step 4: Example usage\n",
+    "role = \"teacher\"\n",
+    "topic = \"Neural Networks\"\n",
+    "\n",
+    "messages = create_chat_prompt(role, topic)\n",
+    "\n",
+    "# Step 5: Print output\n",
+    "for msg in messages:\n",
+    "    print(msg.type.upper() + \": \" + msg.content)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "8587a5df-c836-407c-80f3-6a9ace111f53",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "--- Interview Role ---\n",
+      "SYSTEM: You are an interviewer. Ask questions about the topic.\n",
+      "HUMAN: Tell me about Machine Learning\n",
+      "\n",
+      "--- Motivator Role ---\n",
+      "SYSTEM: You are a motivator. Encourage and inspire about the topic.\n",
+      "HUMAN: Tell me about Career Growth\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"\\n--- Interview Role ---\")\n",
+    "msgs = create_chat_prompt(\"interviewer\", \"Machine Learning\")\n",
+    "for m in msgs:\n",
+    "    print(m.type.upper() + \": \" + m.content)\n",
+    "\n",
+    "print(\"\\n--- Motivator Role ---\")\n",
+    "msgs = create_chat_prompt(\"motivator\", \"Career Growth\")\n",
+    "for m in msgs:\n",
+    "     print(m.type.upper() + \": \" + m.content)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "id": "a0df529e-fbe4-4684-987f-8ef7e3fd4561",
+   "metadata": {},
+   "source": [
+    "## Task 5: Input Validation Layer\n",
+    "\n",
+    "This task demonstrates how to validate user inputs and handle invalid values \n",
+    "by assigning default values."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "4d9a41a6-b132-4793-a7c1-a7d3e13cadcf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Step 1: Validation function\n",
+    "def validate_inputs(audience, tone):\n",
+    "    \n",
+    "    valid_audience = [\"beginner\", \"intermediate\", \"expert\"]\n",
+    "    valid_tone = [\"formal\", \"casual\", \"fun\"]\n",
+    "    \n",
+    "    # Check audience\n",
+    "    if audience.lower() not in valid_audience:\n",
+    "        print(\"Invalid audience! Setting default: beginner\")\n",
+    "        audience = \"beginner\"\n",
+    "    \n",
+    "    # Check tone\n",
+    "    if tone.lower() not in valid_tone:\n",
+    "        print(\"Invalid tone! Setting default: formal\")\n",
+    "        tone = \"formal\"\n",
+    "    \n",
+    "    return audience.lower(), tone.lower()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "bc843bc7-b8d1-421b-900f-8ab7f104f9f5",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdin",
+     "output_type": "stream",
+     "text": [
+      "Enter audience:  Beginner\n",
+      "Enter tone:  Fun\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Final Values:\n",
+      "Audience: beginner\n",
+      "Tone: fun\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Taking user input\n",
+    "audience = input(\"Enter audience: \")\n",
+    "tone = input(\"Enter tone: \")\n",
+    "\n",
+    "# Validate inputs\n",
+    "audience, tone = validate_inputs(audience, tone)\n",
+    "\n",
+    "# Print final values\n",
+    "print(\"\\nFinal Values:\")\n",
+    "print(\"Audience:\", audience)\n",
+    "print(\"Tone:\", tone)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "8ba9caf5-e01a-432c-9ff0-0d917e8c5bd4",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "--- Testing Invalid Input ---\n",
+      "Invalid audience! Setting default: beginner\n",
+      "Invalid tone! Setting default: formal\n",
+      "Audience: beginner\n",
+      "Tone: formal\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"\\n--- Testing Invalid Input ---\")\n",
+    "audience, tone = validate_inputs(\"student\", \"hard\")\n",
+    "print(\"Audience:\", audience)\n",
+    "print(\"Tone:\", tone)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d354f067-05c3-4af5-99cf-139ca733b82f",
+   "metadata": {},
+   "source": [
+    "## Task 6: Prompt Generator App\n",
+    "\n",
+    "This task demonstrates how to build a dynamic prompt generator \n",
+    "using multiple styles and PromptTemplate."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "7cd2068f-6647-4d69-b1e0-8772dbab4ffe",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Import required library\n",
+    "from langchain_core.prompts import PromptTemplate\n",
+    "\n",
+    "# Step 1: Define templates for each style\n",
+    "\n",
+    "teaching_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\", \"audience\", \"tone\"],\n",
+    "    template=\"Explain {topic} for {audience} in a {tone} teaching style\"\n",
+    ")\n",
+    "\n",
+    "interview_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\", \"audience\", \"tone\"],\n",
+    "    template=\"Ask questions about {topic} for {audience} in a {tone} interview style\"\n",
+    ")\n",
+    "\n",
+    "story_template = PromptTemplate(\n",
+    "    input_variables=[\"topic\", \"audience\", \"tone\"],\n",
+    "    template=\"Explain {topic} for {audience} in a {tone} storytelling style\"\n",
+    ")\n",
+    "\n",
+    "# Step 2: Function to generate prompt\n",
+    "def generate_prompt(topic, audience, tone, style):\n",
+    "    \n",
+    "    if style == \"teaching\":\n",
+    "        return teaching_template.format(topic=topic, audience=audience, tone=tone)\n",
+    "    \n",
+    "    elif style == \"interview\":\n",
+    "        return interview_template.format(topic=topic, audience=audience, tone=tone)\n",
+    "    \n",
+    "    elif style == \"storytelling\":\n",
+    "        return story_template.format(topic=topic, audience=audience, tone=tone)\n",
+    "    \n",
+    "    else:\n",
+    "        return \"Invalid style\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "3bed28c5-fa69-4dd2-8810-0290943aa406",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Generated Prompt:\n",
+      "Explain Neural Networks for beginners in a fun storytelling style\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Example input\n",
+    "topic = \"Neural Networks\"\n",
+    "audience = \"beginners\"\n",
+    "tone = \"fun\"\n",
+    "style = \"storytelling\"\n",
+    "\n",
+    "# Generate prompt\n",
+    "result = generate_prompt(topic, audience, tone, style)\n",
+    "\n",
+    "print(\"Generated Prompt:\")\n",
+    "print(result)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "89dcca86-62d2-41df-85b4-ab1ae5caa20b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Explain AI for beginners in a friendly teaching style\n",
+      "Explain Python for kids in a fun storytelling style\n",
+      "Ask questions about Deep Learning for engineers in a formal interview style\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(generate_prompt(\"AI\", \"beginners\", \"friendly\", \"teaching\"))\n",
+    "print(generate_prompt(\"Python\", \"kids\", \"fun\", \"storytelling\"))\n",
+    "print(generate_prompt(\"Deep Learning\", \"engineers\", \"formal\", \"interview\"))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "a86a05f1-2616-45a7-9f48-c8bfd4a772ad",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Invalid audience! Setting default: beginner\n"
+     ]
+    }
+   ],
+   "source": [
+    "audience, tone = validate_inputs(audience, tone)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "885d32af-bb94-44d9-9e56-d7398c7fecf7",
+   "metadata": {},
+   "source": [
+    "## Task 7: Template Reusability Test\n",
+    "\n",
+    "This task demonstrates how a single PromptTemplate can be reused \n",
+    "with multiple inputs to generate different outputs while maintaining the same structure."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "94d8697d-c5f0-4f62-aa12-faf871bd800c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Explain AI for beginner in a friendly tone\n",
+      "Explain Python for kids in a fun tone\n",
+      "Explain Machine Learning for intermediate in a casual tone\n",
+      "Explain Deep Learning for expert in a formal tone\n",
+      "Explain Data Science for beginner in a fun tone\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Import required library\n",
+    "from langchain_core.prompts import PromptTemplate\n",
+    "\n",
+    "# Step 1: Create ONE reusable template\n",
+    "template = PromptTemplate(\n",
+    "    input_variables=[\"topic\", \"audience\", \"tone\"],\n",
+    "    template=\"Explain {topic} for {audience} in a {tone} tone\"\n",
+    ")\n",
+    "\n",
+    "# Step 2: Function to generate prompt\n",
+    "def generate_prompt(topic, audience, tone):\n",
+    "    return template.format(topic=topic, audience=audience, tone=tone)\n",
+    "\n",
+    "# Step 3: 5 different inputs\n",
+    "inputs = [\n",
+    "    (\"AI\", \"beginner\", \"friendly\"),\n",
+    "    (\"Python\", \"kids\", \"fun\"),\n",
+    "    (\"Machine Learning\", \"intermediate\", \"casual\"),\n",
+    "    (\"Deep Learning\", \"expert\", \"formal\"),\n",
+    "    (\"Data Science\", \"beginner\", \"fun\")\n",
+    "]\n",
+    "\n",
+    "# Step 4: Run all inputs\n",
+    "for topic, audience, tone in inputs:\n",
+    "    print(generate_prompt(topic, audience, tone))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "70f95cc7-20fa-47b9-8915-57bf75479d29",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Invalid tone! Setting default: formal\n",
+      "Explain AI for beginner in a formal tone\n",
+      "Invalid audience! Setting default: beginner\n",
+      "Explain Python for beginner in a fun tone\n",
+      "Explain Machine Learning for intermediate in a casual tone\n",
+      "Explain Deep Learning for expert in a formal tone\n",
+      "Explain Data Science for beginner in a fun tone\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Integrating validation\n",
+    "for topic, audience, tone in inputs:\n",
+    "    audience, tone = validate_inputs(audience, tone)\n",
+    "    print(generate_prompt(topic, audience, tone))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.8"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
